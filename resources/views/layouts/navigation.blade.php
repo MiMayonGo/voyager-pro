@@ -15,6 +15,20 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
+                    @role('super_admin')
+                        <a href="/admin/users">Users</a>
+                        <a href="/packages">All Packages</a>
+                    @endrole
+
+                    @role('tour_manager')
+                        <a href="/packages">My Packages</a>
+                        <a href="/bookings">Bookings</a>
+                    @endrole
+
+                    @role('customer')
+                        <a href="/packages">Browse Packages</a>
+                        <a href="/bookings">My Bookings</a>
+                    @endrole
                 </div>
             </div>
 
