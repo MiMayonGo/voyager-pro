@@ -12,11 +12,7 @@ class Review extends Model
 
     protected $fillable = [
         'user_id', 'package_id', 'rating',
-        'title', 'body', 'is_approved',
-    ];
-
-    protected $casts = [
-        'is_approved' => 'boolean',
+        'title', 'body',
     ];
 
     public function user()

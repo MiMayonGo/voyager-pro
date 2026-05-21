@@ -1,21 +1,37 @@
 <x-dashboard-layout title="New Category">
-    <div class="max-w-lg">
-        <div class="flex items-center justify-between mb-6">
-            <h1 class="text-xl font-bold text-gray-900">New Category</h1>
-            <a href="{{ route('categories.index') }}" class="text-sm text-gray-500 hover:text-gray-700">← Back</a>
-        </div>
-        <form method="POST" action="{{ route('categories.store') }}"
-              class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-5">
-            @csrf
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
-                <input type="text" name="name" value="{{ old('name') }}" required
-                       class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
-                @error('name')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
-            </div>
-            <div class="pt-2">
-                <button type="submit" class="bg-teal-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-teal-700">Create Category</button>
-            </div>
-        </form>
+
+  <div class="card border-0 shadow-sm" style="max-width:36rem">
+    <div class="card-header bg-white d-flex align-items-center justify-content-between py-3">
+      <div>
+        <h5 class="fw-bold mb-0"><i class="bi bi-tag-plus me-2" style="color:#0F766E"></i>New Category</h5>
+        <small class="text-muted">Add a new tour package category</small>
+      </div>
+      <a href="{{ route('categories.index') }}" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i> Back
+      </a>
     </div>
+    <div class="card-body p-4">
+      <form method="POST" action="{{ route('categories.store') }}">
+        @csrf
+
+        <div class="mb-3">
+          <label for="name" class="form-label fw-semibold">Name</label>
+          <input type="text" name="name" id="name" value="{{ old('name') }}" required
+                 class="form-control @error('name') is-invalid @enderror"
+                 placeholder="e.g. Adventure, Cultural, Beach">
+          @error('name')
+            <div class="invalid-feedback">{{ $message }}</div>
+          @enderror
+        </div>
+
+        <div class="d-flex gap-2 pt-2">
+          <button type="submit" class="btn text-white" style="background:#0F766E">
+            <i class="bi bi-check-lg me-1"></i> Create Category
+          </button>
+          <a href="{{ route('categories.index') }}" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
 </x-dashboard-layout>

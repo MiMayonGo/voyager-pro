@@ -16,14 +16,13 @@ class ReviewPolicy
                 ->exists();
     }
 
-    public function approve(User $user): bool
+    public function update(User $user, Review $review): bool
     {
-        return $user->hasPermissionTo('reviews.approve');
+        return $user->id === $review->user_id;
     }
 
     public function delete(User $user, Review $review): bool
     {
-        return $user->hasPermissionTo('reviews.delete');
+        return $user->id === $review->user_id;
     }
 }
-

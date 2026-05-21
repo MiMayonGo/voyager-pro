@@ -1,161 +1,290 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $title ?? config('app.name') }} — VoyagePro</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <style>
-        body { font-family: 'Poppins', sans-serif; }
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>{{ $title ?? 'Dashboard' }} — VoyagePro</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+  <style>
+    :root {
+      --sidebar-width: 250px;
+      --topbar-height: 60px;
+      --brand-teal: #0F766E;
+      --brand-teal-light: #14B8A6;
+      --sidebar-bg: #0F172A;
+      --sidebar-text: rgba(255,255,255,0.65);
+      --sidebar-active-bg: rgba(20,184,166,0.15);
+      --sidebar-active-text: #5EEAD4;
+    }
+    * { box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #F1F5F9; margin: 0; }
+
+    /* ── Sidebar ── */
+    #sidebar {
+      position: fixed; top: 0; left: 0; bottom: 0;
+      width: var(--sidebar-width);
+      background: var(--sidebar-bg);
+      display: flex; flex-direction: column;
+      z-index: 1040;
+      transition: transform 0.25s ease;
+    }
+    .sidebar-brand {
+      height: var(--topbar-height);
+      display: flex; align-items: center;
+      padding: 0 1.25rem;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      text-decoration: none;
+    }
+    .sidebar-brand-text {
+      font-size: 1.2rem; font-weight: 700; color: #fff; letter-spacing: -0.3px;
+    }
+    .sidebar-brand-text span { color: var(--brand-teal-light); }
+    .sidebar-role {
+      font-size: 0.62rem; font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: rgba(255,255,255,0.3);
+      padding: 0.75rem 1.25rem 0.25rem;
+    }
+    .sidebar-nav { 
+      flex: 1;
+      overflow-y: auto; 
+      padding: 0.25rem 0.75rem; 
+    }
+    .sidebar-nav a {
+      display: flex; align-items: center; gap: 0.65rem;
+      padding: 0.55rem 0.75rem;
+      border-radius: 8px;
+      font-size: 0.85rem; font-weight: 500;
+      color: var(--sidebar-text);
+      text-decoration: none;
+      transition: background 0.15s, color 0.15s;
+      margin-bottom: 2px;
+    }
+    .sidebar-nav a:hover { background: rgba(255,255,255,0.06); color: #fff; }
+    .sidebar-nav a.active {
+      background: var(--sidebar-active-bg);
+      color: var(--sidebar-active-text);
+    }
+    .sidebar-nav a i { font-size: 1rem; width: 1.1rem; text-align: center; }
+    .sidebar-section {
+      font-size: 0.62rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: rgba(255,255,255,0.25);
+      padding: 0.9rem 0.75rem 0.3rem;
+    }
+    .sidebar-footer {
+      padding: 0.75rem;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .sidebar-user {
+      display: flex; align-items: center; gap: 0.6rem;
+      padding: 0.5rem 0.5rem;
+      border-radius: 8px;
+      margin-bottom: 0.25rem;
+    }
+    .sidebar-avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--brand-teal);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 700; color: #fff; flex-shrink: 0;
+    }
+    .sidebar-user-name { font-size: 0.82rem; font-weight: 600; color: #fff; }
+    .sidebar-user-email { font-size: 0.7rem; color: rgba(255,255,255,0.4); }
+    .sidebar-logout {
+      display: flex; align-items: center; gap: 0.5rem;
+      width: 100%; padding: 0.45rem 0.75rem;
+      border: none; background: transparent; border-radius: 7px;
+      font-size: 0.8rem; color: rgba(255,255,255,0.4);
+      cursor: pointer; transition: background 0.15s, color 0.15s;
+    }
+    .sidebar-logout:hover { background: rgba(239,68,68,0.12); color: #FCA5A5; }
+
+    /* ── Topbar ── */
+    #topbar {
+      position: fixed; top: 0;
+      left: var(--sidebar-width); right: 0;
+      height: var(--topbar-height);
+      background: #fff;
+      border-bottom: 1px solid #E2E8F0;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 1.5rem;
+      z-index: 1030;
+    }
+    .topbar-title { font-size: 1rem; font-weight: 700; color: #1E293B; }
+    .topbar-date  { font-size: 0.75rem; color: #94A3B8; }
+    .topbar-back  {
+      font-size: 0.8rem; color: var(--brand-teal);
+      text-decoration: none; font-weight: 500;
+      display: flex; align-items: center; gap: 0.3rem;
+    }
+    .topbar-back:hover { color: #0D6560; }
+
+    /* ── Page content ── */
+    #page-content {
+      margin-left: var(--sidebar-width);
+      padding-top: var(--topbar-height);
+      min-height: 100vh;
+    }
+    .page-body { padding: 1.75rem; }
+
+    /* ── Responsive ── */
+    @media (max-width: 991.98px) {
+      #sidebar { transform: translateX(-100%); }
+      #sidebar.show { transform: translateX(0); }
+      #topbar { left: 0; }
+      #page-content { margin-left: 0; }
+    }
+  </style>
 </head>
-<body class="bg-gray-50 text-gray-800">
+<body>
 
-<div class="flex min-h-screen">
+<!-- ── SIDEBAR ── -->
+<aside id="sidebar">
+  <a href="{{ url('/') }}" class="sidebar-brand">
+    <span class="sidebar-brand-text">Voyage<span>Pro</span></span>
+  </a>
 
-    {{-- SIDEBAR --}}
-    <aside class="w-64 bg-white border-r border-gray-100 flex flex-col shrink-0 sticky top-0 h-screen overflow-y-auto">
-
-        {{-- Logo --}}
-        <div class="px-6 py-5 border-b border-gray-100">
-            <a href="{{ url('/') }}" class="text-xl font-bold text-gray-900">
-                Voyage<span class="text-teal-600">Pro</span>
-            </a>
-            <p class="text-xs text-gray-400 mt-0.5 uppercase tracking-widest">
-                @auth {{ ucfirst(str_replace('_', ' ', auth()->user()->getRoleNames()->first() ?? 'Dashboard')) }} @endauth
-            </p>
-        </div>
-
-        {{-- Nav --}}
-        <nav class="flex-1 px-4 py-4 space-y-1">
-
-            @role('tour_manager')
-            <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest px-3 mb-2 mt-2">Management</p>
-            <a href="{{ route('manager.dashboard') }}"
-               class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition
-                      {{ request()->routeIs('manager.dashboard') ? 'bg-teal-50 text-teal-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
-                <span class="w-2 h-2 rounded-full bg-teal-500 shrink-0"></span> Dashboard
-            </a>
-            <a href="{{ route('packages.index') }}"
-               class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition
-                      {{ request()->routeIs('packages.*') ? 'bg-teal-50 text-teal-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
-                <span class="w-2 h-2 rounded-full bg-amber-400 shrink-0"></span> Packages
-            </a>
-            <a href="{{ route('bookings.index') }}"
-               class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition
-                      {{ request()->routeIs('bookings.*') ? 'bg-teal-50 text-teal-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
-                <span class="w-2 h-2 rounded-full bg-sky-400 shrink-0"></span> Bookings
-            </a>
-            <a href="{{ route('reviews.index') }}"
-               class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition
-                      {{ request()->routeIs('reviews.*') ? 'bg-teal-50 text-teal-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
-                <span class="w-2 h-2 rounded-full bg-purple-400 shrink-0"></span> Reviews
-            </a>
-            <a href="{{ route('categories.index') }}"
-               class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition
-                      {{ request()->routeIs('categories.*') ? 'bg-teal-50 text-teal-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
-                <span class="w-2 h-2 rounded-full bg-green-400 shrink-0"></span> Categories
-            </a>
-            @endrole
-
-            @role('super_admin')
-            <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest px-3 mb-2 mt-2">Admin</p>
-            <a href="{{ route('admin.dashboard') }}"
-               class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition
-                      {{ request()->routeIs('admin.dashboard') ? 'bg-teal-50 text-teal-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
-                <span class="w-2 h-2 rounded-full bg-red-400 shrink-0"></span> Dashboard
-            </a>
-            <a href="{{ route('admin.users.index') }}"
-               class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition
-                      {{ request()->routeIs('admin.users.*') ? 'bg-teal-50 text-teal-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
-                <span class="w-2 h-2 rounded-full bg-red-400 shrink-0"></span> Users
-            </a>
-            <a href="{{ route('packages.index') }}"
-               class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition
-                      {{ request()->routeIs('packages.*') ? 'bg-teal-50 text-teal-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
-                <span class="w-2 h-2 rounded-full bg-amber-400 shrink-0"></span> Packages
-            </a>
-            <a href="{{ route('bookings.index') }}"
-               class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition
-                      {{ request()->routeIs('bookings.*') ? 'bg-teal-50 text-teal-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
-                <span class="w-2 h-2 rounded-full bg-sky-400 shrink-0"></span> Bookings
-            </a>
-            <a href="{{ route('reviews.index') }}"
-               class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition
-                      {{ request()->routeIs('reviews.*') ? 'bg-teal-50 text-teal-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
-                <span class="w-2 h-2 rounded-full bg-purple-400 shrink-0"></span> Reviews
-            </a>
-            <a href="{{ route('categories.index') }}"
-               class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition
-                      {{ request()->routeIs('categories.*') ? 'bg-teal-50 text-teal-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
-                <span class="w-2 h-2 rounded-full bg-green-400 shrink-0"></span> Categories
-            </a>
-            @endrole
-
-            @role('customer')
-            <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest px-3 mb-2 mt-2">My Account</p>
-            <a href="{{ route('customer.dashboard') }}"
-               class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition
-                      {{ request()->routeIs('customer.dashboard') ? 'bg-teal-50 text-teal-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
-                <span class="w-2 h-2 rounded-full bg-green-500 shrink-0"></span> Dashboard
-            </a>
-            <a href="{{ url('/packages') }}"
-               class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition text-gray-600 hover:bg-gray-50 hover:text-gray-900">
-                <span class="w-2 h-2 rounded-full bg-teal-400 shrink-0"></span> Browse Packages
-            </a>
-            <a href="{{ route('bookings.index') }}"
-               class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition
-                      {{ request()->routeIs('bookings.*') ? 'bg-teal-50 text-teal-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
-                <span class="w-2 h-2 rounded-full bg-sky-400 shrink-0"></span> My Bookings
-            </a>
-            @endrole
-
-        </nav>
-
-        {{-- User + Logout --}}
-        <div class="px-4 py-4 border-t border-gray-100">
-            <div class="flex items-center gap-3 mb-3">
-                <div class="w-8 h-8 rounded-full bg-teal-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
-                    {{ strtoupper(substr(Auth::user()->name, 0, 2)) }}
-                </div>
-                <div class="min-w-0">
-                    <p class="text-sm font-semibold text-gray-800 truncate">{{ Auth::user()->name }}</p>
-                    <p class="text-xs text-gray-400 truncate">{{ Auth::user()->email }}</p>
-                </div>
-            </div>
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit"
-                    class="w-full text-left text-xs text-gray-500 hover:text-red-500 transition px-3 py-1.5 rounded-lg hover:bg-red-50">
-                    → Log Out
-                </button>
-            </form>
-        </div>
-
-    </aside>
-
-    {{-- MAIN --}}
-    <div class="flex-1 flex flex-col min-w-0">
-
-        {{-- Top Bar --}}
-        <header class="bg-white border-b border-gray-100 px-8 py-4 flex items-center justify-between shrink-0">
-            <div>
-                <h1 class="text-lg font-bold text-gray-900">{{ $title ?? 'Dashboard' }}</h1>
-                <p class="text-xs text-gray-400">{{ now()->format('l, F j, Y') }}</p>
-            </div>
-            <a href="{{ url('/') }}" class="text-xs text-teal-600 hover:underline">← Back to site</a>
-        </header>
-
-        {{-- Page Content --}}
-        <main class="flex-1 p-8">
-            {{ $slot }}
-        </main>
-
+  @auth
+    <div class="sidebar-role">
+      {{ ucfirst(str_replace('_', ' ', auth()->user()->getRoleNames()->first() ?? 'User')) }}
     </div>
+  @endauth
+
+  <nav class="sidebar-nav">
+
+    @role('super_admin')
+      <div class="sidebar-section">Admin</div>
+      <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+        <i class="bi bi-speedometer2"></i> Dashboard
+      </a>
+      <a href="{{ route('admin.users.index') }}" class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
+        <i class="bi bi-people-fill"></i> Users
+      </a>
+      <a href="{{ route('packages.index') }}" class="{{ request()->routeIs('packages.*') ? 'active' : '' }}">
+        <i class="bi bi-map-fill"></i> Packages
+      </a>
+      <a href="{{ route('bookings.index') }}" class="{{ request()->routeIs('bookings.*') ? 'active' : '' }}">
+        <i class="bi bi-calendar2-check-fill"></i> Bookings
+      </a>
+      <a href="{{ route('reviews.index') }}" class="{{ request()->routeIs('reviews.*') ? 'active' : '' }}">
+        <i class="bi bi-star-half"></i> Reviews
+      </a>
+      <a href="{{ route('categories.index') }}" class="{{ request()->routeIs('categories.*') ? 'active' : '' }}">
+        <i class="bi bi-tags-fill"></i> Categories
+      </a>
+      <a href="{{ route('reports.index') }}" class="{{ request()->routeIs('reports.*') ? 'active' : '' }}">
+        <i class="bi bi-graph-up-arrow"></i> Reports
+      </a>
+    @endrole
+
+    @role('tour_manager')
+      <div class="sidebar-section">Management</div>
+      <a href="{{ route('manager.dashboard') }}" class="{{ request()->routeIs('manager.dashboard') ? 'active' : '' }}">
+        <i class="bi bi-speedometer2"></i> Dashboard
+      </a>
+      <a href="{{ route('packages.index') }}" class="{{ request()->routeIs('packages.*') ? 'active' : '' }}">
+        <i class="bi bi-map-fill"></i> Packages
+      </a>
+      <a href="{{ route('bookings.index') }}" class="{{ request()->routeIs('bookings.*') ? 'active' : '' }}">
+        <i class="bi bi-calendar2-check-fill"></i> Bookings
+      </a>
+      <a href="{{ route('reviews.index') }}" class="{{ request()->routeIs('reviews.*') ? 'active' : '' }}">
+        <i class="bi bi-star-half"></i> Reviews
+      </a>
+      <a href="{{ route('categories.index') }}" class="{{ request()->routeIs('categories.*') ? 'active' : '' }}">
+        <i class="bi bi-tags-fill"></i> Categories
+      </a>
+    @endrole
+
+    @role('customer')
+      <div class="sidebar-section">My Account</div>
+      <a href="{{ route('customer.dashboard') }}" class="{{ request()->routeIs('customer.dashboard') ? 'active' : '' }}">
+        <i class="bi bi-house-fill"></i> Dashboard
+      </a>
+      <a href="{{ route('packages.index') }}" class="{{ request()->routeIs('packages.index') ? 'active' : '' }}">
+        <i class="bi bi-compass-fill"></i> Browse Packages
+      </a>
+      <a href="{{ route('bookings.index') }}" class="{{ request()->routeIs('bookings.*') ? 'active' : '' }}">
+        <i class="bi bi-bag-check-fill"></i> My Bookings
+      </a>
+      <a href="{{ route('reviews.my') }}" class="{{ request()->routeIs('reviews.my') ? 'active' : '' }}">
+        <i class="bi bi-star-half"></i> My Reviews
+      </a>
+    @endrole
+
+  </nav>
+
+  <div class="sidebar-footer">
+    @auth
+      <div class="sidebar-user">
+        <div class="sidebar-avatar">{{ strtoupper(substr(Auth::user()->name, 0, 2)) }}</div>
+        <div class="overflow-hidden">
+          <div class="sidebar-user-name text-truncate">{{ Auth::user()->name }}</div>
+          <div class="sidebar-user-email text-truncate">{{ Auth::user()->email }}</div>
+        </div>
+      </div>
+      <form method="POST" action="{{ route('logout') }}">
+        @csrf
+        <button type="submit" class="sidebar-logout">
+          <i class="bi bi-box-arrow-left"></i> Log Out
+        </button>
+      </form>
+    @endauth
+  </div>
+</aside>
+
+<!-- ── TOPBAR ── -->
+<div id="topbar">
+  <div class="d-flex align-items-center gap-3">
+    <button class="btn btn-sm d-lg-none p-1 border-0" id="sidebarToggle">
+      <i class="bi bi-list fs-5"></i>
+    </button>
+    <div>
+      <div class="topbar-title">{{ $title ?? 'Dashboard' }}</div>
+      <div class="topbar-date">{{ now()->format('l, F j, Y') }}</div>
+    </div>
+  </div>
+  <a href="{{ url('/') }}" class="topbar-back">
+    <i class="bi bi-arrow-left"></i> Back to site
+  </a>
 </div>
 
+<!-- ── SIDEBAR OVERLAY (mobile) ── -->
+<div id="sidebarOverlay"
+     style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:1035;"
+     onclick="closeSidebar()"></div>
+
+<!-- ── PAGE CONTENT ── -->
+<div id="page-content">
+  <div class="page-body">
+    {{ $slot }}
+  </div>
+</div>
+
+<!-- Bootstrap 5 JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const sidebar  = document.getElementById('sidebar');
+  const overlay  = document.getElementById('sidebarOverlay');
+  document.getElementById('sidebarToggle')?.addEventListener('click', () => {
+    sidebar.classList.toggle('show');
+    overlay.style.display = sidebar.classList.contains('show') ? 'block' : 'none';
+  });
+  function closeSidebar() {
+    sidebar.classList.remove('show');
+    overlay.style.display = 'none';
+  }
+</script>
+@stack('scripts')
 </body>
 </html>

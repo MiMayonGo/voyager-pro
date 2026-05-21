@@ -24,8 +24,6 @@ class RoleSeeder extends Seeder
             'bookings.manage',
             'bookings.cancel-own',
             'reviews.create',
-            'reviews.approve',
-            'reviews.delete',
             'payments.view',
             'invoices.view-own',
             'users.manage',
@@ -48,8 +46,6 @@ class RoleSeeder extends Seeder
             'categories.manage',
             'bookings.view',
             'bookings.manage',
-            'reviews.approve',
-            'reviews.delete',
             'payments.view',
         ]);
 

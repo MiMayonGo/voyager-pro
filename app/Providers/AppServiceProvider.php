@@ -35,9 +35,16 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(\App\Models\Review::class,  \App\Policies\ReviewPolicy::class);
         Gate::policy(\App\Models\Invoice::class, \App\Policies\InvoicePolicy::class);
 
-        // Super admin bypasses all authorization checks
+        // Super admin bypasses all authorization checks except for review ownership
         Gate::before(function ($user, $ability) {
             if ($user->hasRole('super_admin')) {
+                // Do not bypass review update/delete — ownership must be respected
+                if (in_array($ability, ['update', 'delete'])) {
+                    $review = request()->route('review');
+                    if ($review instanceof \App\Models\Review) {
+                        return $user->id === $review->user_id;
+                    }
+                }
                 return true;
             }
         });

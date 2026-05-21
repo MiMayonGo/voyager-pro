@@ -9,15 +9,29 @@ use Illuminate\Support\Facades\DB;
 
 class BookingController extends Controller
 {
-    public function index()
-    {
-        $bookings = auth()->user()->hasRole('customer')
-            ? Booking::with('package')->where('user_id', auth()->id())->latest()->paginate(10)
-            : Booking::with(['user', 'package'])->latest()->paginate(15);
+ public function index(Request $request)
+{
+    $search = $request->input('search');
 
-        return view('bookings.index', compact('bookings'));
-    }
-
+    if (auth()->user()->hasRole('customer')) {
+        $bookings = Booking::with('package')
+            ->where('user_id', auth()->id())
+            ->when($search, fn($q) => $q->whereHas('package', fn($p) => $p->where('title', 'like', "%{$search}%")))
+            ->latest()
+            ->paginate(9)
+            ->withQueryString();
+    } else {
+        $bookings = Booking::with(['user', 'package'])
+            ->when($search, fn($q) => $q->where(function ($q) use ($search) {
+                $q->whereHas('package', fn($p) => $p->where('title', 'like', "%{$search}%"))
+                  ->orWhereHas('user', fn($u) => $u->where('name', 'like', "%{$search}%"));
+            }))
+            ->latest()
+            ->paginate(12)
+            ->withQueryString();
+    }       
+    return view('bookings.index', compact('bookings', 'search'));
+}
     public function show(Booking $booking)
     {
         if (auth()->id() !== $booking->user_id && !auth()->user()->hasPermissionTo('bookings.view')) {

@@ -9,10 +9,28 @@ use Illuminate\Support\Str;
 
 class PackageController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $packages = Package::with('categories')->latest()->paginate(10);
-        return view('packages.index', compact('packages'));
+        $search = $request->input('search');
+        $category = $request->input('category');
+
+        $packages = Package::with('categories')
+            ->withCount('reviews as review_count')
+            ->withAvg('reviews as avg_rating', 'rating')
+            ->when($search, fn($q) => $q->where(function($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhere('price', 'like', "%{$search}%");
+            }))
+            ->when($category, fn($q) => $q->whereHas('categories', fn($c) => $c->where('categories.id', $category)))
+            ->when(auth()->user()->hasRole('customer'), fn($q) => $q->where('status', 'active'))
+            ->latest()
+            ->paginate(12)
+            ->withQueryString();
+
+        $categories = Category::orderBy('name')->get();
+
+        return view('packages.index', compact('packages', 'categories', 'search', 'category'));
     }
 
     public function create()
