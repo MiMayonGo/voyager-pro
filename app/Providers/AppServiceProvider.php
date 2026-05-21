@@ -11,6 +11,7 @@ use App\Policies\InvoicePolicy;
 use App\Policies\PackagePolicy;
 use App\Policies\ReviewPolicy;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -30,6 +31,10 @@ class AppServiceProvider extends ServiceProvider
    
     public function boot(): void
     {
+        if (env('APP_ENV') === 'production') {
+            URL::forceScheme('https');
+        }
+
         Gate::policy(\App\Models\Booking::class, \App\Policies\BookingPolicy::class);
         Gate::policy(\App\Models\Package::class, \App\Policies\PackagePolicy::class);
         Gate::policy(\App\Models\Review::class,  \App\Policies\ReviewPolicy::class);
